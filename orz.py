@@ -3,14 +3,14 @@ import re
 import shutil
 import argparse
 import tvdb_v4_official # type: ignore
-from dotenv import load_dotenv 
+from dotenv import load_dotenv # type: ignore
 
 # Load the environment variables
 load_dotenv()
 api_key = os.getenv('TVDB_API_KEY')
 
-# Initialize Tvdb API (replace 'your_api_key_here' with your actual API key)
-tvdb = tvdb_v4_official.TVDB("")
+# Initialize TVDB API
+tvdb = tvdb_v4_official.TVDB(api_key)
 
 # Supported video file extensions
 VIDEO_EXTENSIONS = {".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"}

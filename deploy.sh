@@ -9,7 +9,7 @@ else
 fi
 
 # Step 1: Sync files to the server
-rsync -avz --exclude 'deploy.sh' --exclude '.env' --exclude '.venv/' --exclude '.git/' --exclude '__pycache__/' $LOCAL_PATH $SERVER_USER@$SERVER_HOST:$SERVER_PATH
+rsync -avz --exclude 'deploy.sh' --exclude '.venv/' --exclude '.git/' --exclude '__pycache__/' $LOCAL_PATH $SERVER_USER@$SERVER_HOST:$SERVER_PATH
 
 # Step 2: SSH into the server and execute commands
 ssh -T $SERVER_USER@$SERVER_HOST << EOF

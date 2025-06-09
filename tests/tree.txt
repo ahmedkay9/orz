@@ -1,0 +1,305 @@
+.
+├── Abbott Elementary (2021) S03 (1080p AMZN WEB-DL x265 10bit EAC3 5.1 Silence)
+│   ├── Abbott Elementary (2021) - S03E01-E02 - Career Day (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S03E03 - Gregory's Garden Goofballs (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S03E04 - Smoking (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S03E05 - Breakup (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S03E06 - Willard R. Abbott (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S03E07 - Librarian (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S03E08 - Panel (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S03E09 - Alex (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S03E10 - 2 Ava 2 Fest (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S03E11 - Double Date (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S03E12 - Mother's Day (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S03E13 - Smith Playground (1080p AMZN WEB-DL x265 Silence).mkv
+│   └── Abbott Elementary (2021) - S03E14 - Party (1080p AMZN WEB-DL x265 Silence).mkv
+├── Abbott Elementary (2021) S04 (1080p AMZN WEB-DL x265 10bit EAC3 5.1 Silence)
+│   ├── Abbott Elementary (2021) - S04E02 - Ringworm (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S04E03 - Class Pet (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S04E04 - Costume Contest (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S04E06 - The Deli (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S04E07 - Winter Show (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S04E08 - Winter Break (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S04E10 - Testing (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S04E11 - Strike (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S04E12 - Girard Creek (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S04E14 - District Budget Meeting (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S04E16 - Books (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S04E17 - Karaoke (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S04E18 - Audit (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S04E20 - Ava Fest Tokyo Drift (1080p AMZN WEB-DL x265 Silence).mkv
+│   ├── Abbott Elementary (2021) - S04E21 - Rally (1080p AMZN WEB-DL x265 Silence).mkv
+│   └── Abbott Elementary (2021) - S04E22 - Please Touch Museum (1080p AMZN WEB-DL x265 Silence).mkv
+├── Abbott.Elementary.S01.1080p.WEBRip.x265[eztv.re]
+│   └── Subs
+│       ├── Abbott.Elementary.S01E01.1080p.WEBRip.x265-RARBG[eztv.re]
+│       │   ├── 18_Portuguese.srt
+│       │   ├── 19_Romanian.srt
+│       │   ├── 2_English.srt
+│       │   ├── 3_English.srt
+│       │   ├── 4_Danish.srt
+│       │   ├── 5_German.srt
+│       │   └── 7_Spanish.srt
+│       ├── Abbott.Elementary.S01E02.1080p.WEBRip.x265-RARBG[eztv.re]
+│       │   ├── 10_French.srt
+│       │   ├── 11_Italian.srt
+│       │   ├── 12_Japanese.srt
+│       │   ├── 13_Korean.srt
+│       │   ├── 14_Dutch.srt
+│       │   ├── 15_nor.srt
+│       │   ├── 16_Polish.srt
+│       │   ├── 17_Portuguese.srt
+│       │   ├── 18_Portuguese.srt
+│       │   ├── 19_Romanian.srt
+│       │   ├── 20_Swedish.srt
+│       │   ├── 21_Turkish.srt
+│       │   ├── 22_Chinese.srt
+│       │   ├── 23_Chinese.srt
+│       │   ├── 2_English.srt
+│       │   ├── 3_English.srt
+│       │   ├── 4_Danish.srt
+│       │   ├── 5_German.srt
+│       │   ├── 6_Greek.srt
+│       │   ├── 7_Spanish.srt
+│       │   ├── 8_Spanish.srt
+│       │   └── 9_Finnish.srt
+│       ├── Abbott.Elementary.S01E03.1080p.WEBRip.x265-RARBG[eztv.re]
+│       │   ├── 10_French.srt
+│       │   ├── 11_Italian.srt
+│       │   ├── 12_Japanese.srt
+│       │   ├── 13_Korean.srt
+│       │   ├── 14_Dutch.srt
+│       │   ├── 15_nor.srt
+│       │   ├── 16_Polish.srt
+│       │   ├── 17_Portuguese.srt
+│       │   ├── 18_Portuguese.srt
+│       │   ├── 19_Romanian.srt
+│       │   ├── 20_Swedish.srt
+│       │   ├── 21_Turkish.srt
+│       │   ├── 22_Chinese.srt
+│       │   ├── 23_Chinese.srt
+│       │   ├── 2_English.srt
+│       │   ├── 3_English.srt
+│       │   ├── 4_Danish.srt
+│       │   ├── 5_German.srt
+│       │   ├── 6_Greek.srt
+│       │   ├── 7_Spanish.srt
+│       │   ├── 8_Spanish.srt
+│       │   └── 9_Finnish.srt
+│       ├── Abbott.Elementary.S01E04.1080p.WEBRip.x265-RARBG[eztv.re]
+│       │   ├── 10_French.srt
+│       │   ├── 11_Italian.srt
+│       │   ├── 12_Japanese.srt
+│       │   ├── 13_Korean.srt
+│       │   ├── 14_Dutch.srt
+│       │   ├── 15_nor.srt
+│       │   ├── 16_Polish.srt
+│       │   ├── 17_Portuguese.srt
+│       │   ├── 18_Portuguese.srt
+│       │   ├── 19_Romanian.srt
+│       │   ├── 20_Swedish.srt
+│       │   ├── 21_Turkish.srt
+│       │   ├── 22_Chinese.srt
+│       │   ├── 23_Chinese.srt
+│       │   ├── 2_English.srt
+│       │   ├── 3_English.srt
+│       │   ├── 4_Danish.srt
+│       │   ├── 5_German.srt
+│       │   ├── 6_Greek.srt
+│       │   ├── 7_Spanish.srt
+│       │   ├── 8_Spanish.srt
+│       │   └── 9_Finnish.srt
+│       ├── Abbott.Elementary.S01E05.1080p.WEBRip.x265-RARBG[eztv.re]
+│       │   ├── 10_French.srt
+│       │   ├── 11_Italian.srt
+│       │   ├── 12_Japanese.srt
+│       │   ├── 13_Korean.srt
+│       │   ├── 14_Dutch.srt
+│       │   ├── 15_nor.srt
+│       │   ├── 16_Polish.srt
+│       │   ├── 17_Portuguese.srt
+│       │   ├── 18_Portuguese.srt
+│       │   ├── 19_Romanian.srt
+│       │   ├── 20_Swedish.srt
+│       │   ├── 21_Turkish.srt
+│       │   ├── 22_Chinese.srt
+│       │   ├── 23_Chinese.srt
+│       │   ├── 2_English.srt
+│       │   ├── 3_English.srt
+│       │   ├── 4_Danish.srt
+│       │   ├── 5_German.srt
+│       │   ├── 6_Greek.srt
+│       │   ├── 7_Spanish.srt
+│       │   ├── 8_Spanish.srt
+│       │   └── 9_Finnish.srt
+│       ├── Abbott.Elementary.S01E06.1080p.WEBRip.x265-RARBG[eztv.re]
+│       │   ├── 10_French.srt
+│       │   ├── 11_Italian.srt
+│       │   ├── 12_Japanese.srt
+│       │   ├── 13_Korean.srt
+│       │   ├── 14_Dutch.srt
+│       │   ├── 15_nor.srt
+│       │   ├── 16_Polish.srt
+│       │   ├── 17_Portuguese.srt
+│       │   ├── 18_Portuguese.srt
+│       │   ├── 19_Romanian.srt
+│       │   ├── 20_Swedish.srt
+│       │   ├── 21_Turkish.srt
+│       │   ├── 22_Chinese.srt
+│       │   ├── 23_Chinese.srt
+│       │   ├── 2_English.srt
+│       │   ├── 3_English.srt
+│       │   ├── 4_Danish.srt
+│       │   ├── 5_German.srt
+│       │   ├── 6_Greek.srt
+│       │   ├── 7_Spanish.srt
+│       │   ├── 8_Spanish.srt
+│       │   └── 9_Finnish.srt
+│       ├── Abbott.Elementary.S01E07.1080p.WEBRip.x265-RARBG[eztv.re]
+│       │   ├── 10_French.srt
+│       │   ├── 11_Italian.srt
+│       │   ├── 12_Japanese.srt
+│       │   ├── 13_Korean.srt
+│       │   ├── 14_Dutch.srt
+│       │   ├── 15_nor.srt
+│       │   ├── 16_Polish.srt
+│       │   ├── 17_Portuguese.srt
+│       │   ├── 18_Portuguese.srt
+│       │   ├── 19_Romanian.srt
+│       │   ├── 20_Swedish.srt
+│       │   ├── 21_Turkish.srt
+│       │   ├── 22_Chinese.srt
+│       │   ├── 23_Chinese.srt
+│       │   ├── 2_English.srt
+│       │   ├── 3_English.srt
+│       │   ├── 4_Danish.srt
+│       │   ├── 5_German.srt
+│       │   ├── 6_Greek.srt
+│       │   ├── 7_Spanish.srt
+│       │   ├── 8_Spanish.srt
+│       │   └── 9_Finnish.srt
+│       ├── Abbott.Elementary.S01E08.1080p.WEBRip.x265-RARBG[eztv.re]
+│       │   ├── 10_French.srt
+│       │   ├── 11_Italian.srt
+│       │   ├── 12_Japanese.srt
+│       │   ├── 13_Korean.srt
+│       │   ├── 14_Dutch.srt
+│       │   ├── 15_nor.srt
+│       │   ├── 16_Polish.srt
+│       │   ├── 17_Portuguese.srt
+│       │   ├── 18_Portuguese.srt
+│       │   ├── 19_Romanian.srt
+│       │   ├── 20_Swedish.srt
+│       │   ├── 21_Turkish.srt
+│       │   ├── 22_Chinese.srt
+│       │   ├── 23_Chinese.srt
+│       │   ├── 2_English.srt
+│       │   ├── 3_English.srt
+│       │   ├── 4_Danish.srt
+│       │   ├── 5_German.srt
+│       │   ├── 6_Greek.srt
+│       │   ├── 7_Spanish.srt
+│       │   ├── 8_Spanish.srt
+│       │   └── 9_Finnish.srt
+│       ├── Abbott.Elementary.S01E09.1080p.WEBRip.x265-RARBG[eztv.re]
+│       │   ├── 10_French.srt
+│       │   ├── 11_Italian.srt
+│       │   ├── 12_Japanese.srt
+│       │   ├── 13_Korean.srt
+│       │   ├── 14_Dutch.srt
+│       │   ├── 15_nor.srt
+│       │   ├── 16_Polish.srt
+│       │   ├── 17_Portuguese.srt
+│       │   ├── 18_Portuguese.srt
+│       │   ├── 19_Romanian.srt
+│       │   ├── 20_Swedish.srt
+│       │   ├── 21_Turkish.srt
+│       │   ├── 22_Chinese.srt
+│       │   ├── 23_Chinese.srt
+│       │   ├── 2_English.srt
+│       │   ├── 3_English.srt
+│       │   ├── 4_Danish.srt
+│       │   ├── 5_German.srt
+│       │   ├── 6_Greek.srt
+│       │   ├── 7_Spanish.srt
+│       │   ├── 8_Spanish.srt
+│       │   └── 9_Finnish.srt
+│       ├── Abbott.Elementary.S01E10.1080p.WEBRip.x265-RARBG[eztv.re]
+│       │   ├── 10_French.srt
+│       │   ├── 11_Italian.srt
+│       │   ├── 12_Japanese.srt
+│       │   ├── 13_Korean.srt
+│       │   ├── 14_Dutch.srt
+│       │   ├── 15_nor.srt
+│       │   ├── 16_Polish.srt
+│       │   ├── 17_Portuguese.srt
+│       │   ├── 18_Portuguese.srt
+│       │   ├── 19_Romanian.srt
+│       │   ├── 20_Swedish.srt
+│       │   ├── 21_Turkish.srt
+│       │   ├── 22_Chinese.srt
+│       │   ├── 23_Chinese.srt
+│       │   ├── 2_English.srt
+│       │   ├── 3_English.srt
+│       │   ├── 4_Danish.srt
+│       │   ├── 5_German.srt
+│       │   ├── 6_Greek.srt
+│       │   ├── 7_Spanish.srt
+│       │   ├── 8_Spanish.srt
+│       │   └── 9_Finnish.srt
+│       ├── Abbott.Elementary.S01E11.1080p.WEBRip.x265-RARBG[eztv.re]
+│       │   ├── 10_French.srt
+│       │   ├── 11_Italian.srt
+│       │   ├── 12_Japanese.srt
+│       │   ├── 13_Korean.srt
+│       │   ├── 14_Dutch.srt
+│       │   ├── 15_nor.srt
+│       │   ├── 16_Polish.srt
+│       │   ├── 17_Portuguese.srt
+│       │   ├── 18_Portuguese.srt
+│       │   ├── 19_Romanian.srt
+│       │   ├── 20_Swedish.srt
+│       │   ├── 21_Turkish.srt
+│       │   ├── 22_Chinese.srt
+│       │   ├── 23_Chinese.srt
+│       │   ├── 2_English.srt
+│       │   ├── 3_English.srt
+│       │   ├── 4_Danish.srt
+│       │   ├── 5_German.srt
+│       │   ├── 6_Greek.srt
+│       │   ├── 7_Spanish.srt
+│       │   ├── 8_Spanish.srt
+│       │   └── 9_Finnish.srt
+│       └── Abbott.Elementary.S01E12.1080p.WEBRip.x265-RARBG[eztv.re]
+│           ├── 10_French.srt
+│           ├── 11_Italian.srt
+│           ├── 12_Japanese.srt
+│           ├── 13_Korean.srt
+│           ├── 14_Dutch.srt
+│           ├── 15_nor.srt
+│           ├── 16_Polish.srt
+│           ├── 17_Portuguese.srt
+│           ├── 18_Portuguese.srt
+│           ├── 19_Romanian.srt
+│           ├── 20_Swedish.srt
+│           ├── 21_Turkish.srt
+│           ├── 22_Chinese.srt
+│           ├── 23_Chinese.srt
+│           ├── 2_English.srt
+│           ├── 3_English.srt
+│           ├── 4_Danish.srt
+│           ├── 5_German.srt
+│           ├── 6_Greek.srt
+│           ├── 7_Spanish.srt
+│           ├── 8_Spanish.srt
+│           └── 9_Finnish.srt
+├── Craig Alanson - Gateway Expeditionary Force, Book 18
+│   ├── Gateway Expeditionary Force, Book 18.cue
+│   ├── Gateway Expeditionary Force, Book 18.jpg
+│   ├── Gateway Expeditionary Force, Book 18.m4b
+│   └── Gateway Expeditionary Force, Book 18.nfo
+├── King of the Hill S10 1080p DSNP WEB-DL AAC 2.0 x264-CRFW
+│   └── King.of.the.Hill.S10E04.Harlottown.1080p.DSNP.WEB-DL.AAC2.0.H.264-CRFW.mkv
+└── Unexpectedly Twisted Book 1 - The Silencer.m4b
+
+19 directories, 284 files

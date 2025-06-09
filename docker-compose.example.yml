@@ -1,0 +1,25 @@
+services:
+  orz-watcher:
+    build: .
+    container_name: orz-watcher
+    restart: unless-stopped
+    environment:
+      # --- Required ---
+      - TVDB_API_KEY=${TVDB_API_KEY}
+
+      # --- Core Paths ---
+      - TV_DIR=${TV_DIR:-/data/tv}
+      - MOVIES_DIR=${MOVIES_DIR:-/data/movies}
+
+      # --- Behavior ---
+      - DELETE_SOURCE_FILES=${DELETE_SOURCE_FILES:-false}
+      - CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD:-85}
+
+      # --- Advanced ---
+      - FILE_STABILITY_CHECK_INTERVAL=${FILE_STABILITY_CHECK_INTERVAL:-2}
+      - FILE_STABILITY_CHECK_TIMEOUT=${FILE_STABILITY_CHECK_TIMEOUT:-300}
+
+    volumes:
+      # Mount volumes to give the container access to your media files.
+      - /path/to/your/downloads/completed:/watch
+      - /path/to/your/plex/library:/data

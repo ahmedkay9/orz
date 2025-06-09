@@ -8,7 +8,7 @@ import json
 from dotenv import load_dotenv
 from colorama import init, Fore, Style
 from thefuzz import process as fuzzy_process
-from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import FileSystemEventHandler
 
 # --- CONFIGURATION ---

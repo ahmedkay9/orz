@@ -8,6 +8,9 @@ ENV PYTHONUNBUFFERED 1
 # Set the working directory inside the container
 WORKDIR /app
 
+# Install ffmpeg, which provides the ffprobe command-line tool
+RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+
 # Copy the requirements file into the container
 COPY requirements.txt .
 

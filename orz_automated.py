@@ -33,6 +33,8 @@ BUNDLE_STABILITY_TIMEOUT = int(os.getenv('BUNDLE_STABILITY_TIMEOUT', '300')) # 5
 
 
 # --- PLEX NAMING CONSTANTS ---
+# These dictionaries are used to parse filenames for version and edition info.
+# They are placed here to be easily modified or eventually loaded from a config file.
 SUBTITLE_EXTENSIONS = {".srt", ".vtt", ".ass", ".ssa", ".sub"}
 VIDEO_EXTENSIONS = {".mp4", ".mkv", ".avi", ".mov", ".flv", ".wmv"}
 EXTRAS_KEYWORDS_TO_DIR = {
@@ -49,6 +51,42 @@ LANG_CODE_MAP = {
     'german': 'de', 'ger': 'de',
     'italian': 'it', 'ita': 'it'
 } # Add more as needed
+
+# Maps keywords found in a filename to the official Plex {edition} tag.
+EDITION_KEYWORDS = {
+    'extended': '{edition-Extended Cut}',
+    'superfan': '{edition-Superfan Cut}',
+    "director's cut": "{edition-Director's Cut}",
+    "directors cut": "{edition-Director's Cut}",
+    'theatrical': '{edition-Theatrical Cut}',
+    'uncut': '{edition-Uncut}',
+    'unrated': '{edition-Unrated}',
+    'remastered': '{edition-Remastered}',
+    'imax': '{edition-IMAX}'
+}
+
+# Maps keywords to tags for building a version string (e.g., "1080p BluRay").
+# The order in the lists determines the order of appearance in the final string.
+VERSION_KEYWORDS = {
+    'resolution': {
+        '2160p': '4K', '4k': '4K',
+        '1080p': '1080p',
+        '720p': '720p',
+        '576p': '576p',
+        '480p': '480p',
+        'dvd': 'DVD'
+    },
+    'source': {
+        'remux': 'Remux',
+        'bluray': 'BluRay',
+        'web-dl': 'WEB-DL',
+        'webdl': 'WEB-DL',
+        'webrip': 'WEBRip',
+        'hdtv': 'HDTV',
+        'dvdrip': 'DVDRip'
+    }
+}
+
 
 # --- INITIALIZATION ---
 # Initialize colorama for cross-platform colored terminal text.
@@ -150,6 +188,51 @@ def parse_filename(filename):
     title = re.sub(r'\s+', ' ', title_part).strip()
     return {"title": title, "year": year, "season": season, "start_episode": start_episode, "end_episode": end_episode}
 
+def get_edition_info(filename):
+    """
+    Parses a filename to find edition information by checking against a keyword dictionary.
+
+    Args:
+        filename (str): The filename to parse.
+
+    Returns:
+        str or None: The formatted edition string (e.g., "{edition-Superfan Cut}") or None.
+    """
+    fn_lower = filename.lower().replace('.', ' ').replace('_', ' ')
+    for keyword, edition_tag in EDITION_KEYWORDS.items():
+        if keyword in fn_lower:
+            return edition_tag
+    return None
+
+def get_version_string(filepath):
+    """
+    Creates a descriptive string for a file's version based on quality tags
+    found by checking against keyword dictionaries.
+
+    Args:
+        filepath (str): The full path to the video file.
+
+    Returns:
+        str: A descriptive string like "1080p - BluRay" or an empty string if no tags are found.
+    """
+    filename_lower = os.path.basename(filepath).lower()
+    tags = []
+
+    # Check for resolution keywords
+    for keyword, tag in VERSION_KEYWORDS['resolution'].items():
+        if keyword in filename_lower:
+            tags.append(tag)
+            break # Stop after finding the first resolution match
+
+    # Check for source keywords
+    for keyword, tag in VERSION_KEYWORDS['source'].items():
+        if keyword in filename_lower:
+            tags.append(tag)
+            break # Stop after finding the first source match
+
+    return " - ".join(tags)
+
+
 def get_extra_type(filename):
     """
     Determines if a file is an extra (e.g., trailer, deleted scene) and returns
@@ -166,45 +249,6 @@ def get_extra_type(filename):
         if keyword in fn_lower:
             return dir_name
     return None
-
-def get_quality_score(filepath):
-    """
-    Calculates a numeric quality score for a video file to decide on upgrades.
-    It checks filename tags first, then falls back to ffprobe for resolution.
-
-    Args:
-        filepath (str): The full path to the video file.
-
-    Returns:
-        int: A numeric score representing the video's quality.
-    """
-    if not os.path.exists(filepath): return 0
-    filename_lower = os.path.basename(filepath).lower()
-    score = 0
-    if '2160p' in filename_lower or '4k' in filename_lower: score = 400
-    elif '1080p' in filename_lower: score = 300
-    elif '720p' in filename_lower: score = 200
-    elif '480p' in filename_lower or 'sd' in filename_lower: score = 100
-
-    if score == 0:
-        command = ["ffprobe", "-v", "quiet", "-print_format", "json", "-show_streams", filepath]
-        try:
-            result = subprocess.run(command, capture_output=True, text=True, check=True)
-            data = json.loads(result.stdout)
-            video_stream = next((s for s in data.get('streams', []) if s.get('codec_type') == 'video'), None)
-            resolution = int(video_stream['height']) if video_stream and 'height' in video_stream else 0
-            if resolution >= 2160: score = 400
-            elif resolution >= 1080: score = 300
-            elif resolution >= 720: score = 200
-            elif resolution > 0: score = 100
-        except Exception as e:
-            logging.error(f"ffprobe failed for '{os.path.basename(filepath)}': {e}. Quality score may be inaccurate.")
-
-    if 'remux' in filename_lower: score += 50
-    elif 'bluray' in filename_lower: score += 45
-    elif 'web-dl' in filename_lower or 'webrip' in filename_lower: score += 40
-    elif 'hdtv' in filename_lower: score += 20
-    return score
 
 def search_tvdb_metadata(parsed_info, media_type=None):
     """
@@ -276,6 +320,7 @@ def safe_remove(path, is_source_bundle=False):
             shutil.rmtree(path)
             logging.info(f"Cleaned up source bundle: {path}")
         elif os.path.isfile(path):
+            # This function is now only used for source cleanup, not destination management.
             os.remove(path)
             logging.info(f"Cleaned up source file: {os.path.basename(path)}")
     except OSError as e:
@@ -329,7 +374,7 @@ def wait_for_stability(path):
     while time.time() - start_time < BUNDLE_STABILITY_TIMEOUT:
         current_snapshot = get_snapshot(path)
 
-        if current_snapshot == last_snapshot:
+        if current_snapshot and current_snapshot == last_snapshot:
             logging.info(f"'{item_name}' is stable.")
             return True
 
@@ -339,6 +384,31 @@ def wait_for_stability(path):
 
     logging.error(f"Stability check for '{item_name}' timed out after {BUNDLE_STABILITY_TIMEOUT} seconds.")
     return False
+
+# --- NEW: VERSION CHECKER ---
+def get_existing_version_info(dest_dir, base_filename):
+    """
+    Scans a destination directory to find the highest quality score for each existing edition of a media file.
+
+    Args:
+        dest_dir (str): The destination directory to scan (e.g., a movie or season folder).
+        base_filename (str): The base name of the media to look for (e.g., "Movie (2010)").
+
+    Returns:
+        dict: A dictionary mapping edition tags to their highest quality score. e.g., {'{edition-Theatrical}': 345}
+    """
+    versions = {}
+    if not os.path.isdir(dest_dir):
+        return versions
+
+    for filename in os.listdir(dest_dir):
+        if filename.startswith(base_filename) and is_video_file(filename):
+            edition = get_edition_info(filename) or "{edition-Theatrical Cut}" # Default to theatrical if no tag
+            score = get_quality_score(os.path.join(dest_dir, filename))
+
+            if edition not in versions or score > versions[edition]:
+                versions[edition] = score
+    return versions
 
 # --- BUNDLE AND FILE PROCESSING LOGIC ---
 def process_subtitles(subtitle_files, media_files_map):
@@ -356,7 +426,8 @@ def process_subtitles(subtitle_files, media_files_map):
         sub_ext = os.path.splitext(sub_path)[1]
 
         matching_video_path = None
-        for vid_basename, vid_path in video_basename_map.items():
+        # Find a matching video by checking if the subtitle name starts with the video name
+        for vid_basename, vid_path in sorted(video_basename_map.items(), key=lambda x: len(x[0]), reverse=True):
             if sub_basename.startswith(vid_basename):
                 matching_video_path = vid_path
                 break
@@ -393,33 +464,51 @@ def process_subtitles(subtitle_files, media_files_map):
             shutil.copy2(sub_path, final_sub_path)
 
 def process_movie_bundle(bundle_path, metadata, video_files, extra_files, subtitle_files):
-    # Docstring here...
+    """
+    Handles the logic for a movie bundle, supporting multi-version and editions.
+    It copies new versions if they are a new edition or a higher quality of an existing edition.
+    """
     logging.info(Fore.CYAN + f"--- Processing as MOVIE Bundle: {os.path.basename(bundle_path)} ---")
 
-    main_file = max(video_files, key=lambda f: os.path.getsize(f[0]))[0] if video_files else None
-    if not main_file:
-        logging.error("No video file found to be the main movie. Skipping bundle.")
-        return
+    if not video_files: return
 
     title, year, tvdb_id = metadata["name"], metadata["year"], metadata["tvdb_id"]
     safe_title = re.sub(r'[<>:"/\\|?*]', '', title)
     item_dest_dir = os.path.join(MOVIES_DIR, f"{safe_title} ({year}) {{tvdb-{tvdb_id}}}")
     os.makedirs(item_dest_dir, exist_ok=True)
 
-    main_ext = os.path.splitext(main_file)[1]
-    final_main_path = os.path.join(item_dest_dir, f"{safe_title} ({year}){main_ext}")
-    final_media_paths = {main_file: final_main_path}
+    base_filename = f"{safe_title} ({year})"
+    existing_versions = get_existing_version_info(item_dest_dir, base_filename)
+    final_media_paths = {}
 
-    if os.path.exists(final_main_path):
-        new_score, old_score = get_quality_score(main_file), get_quality_score(final_main_path)
-        if new_score > old_score:
-            logging.info(f"Upgrading movie '{safe_title}' (Score: {old_score} -> {new_score})")
-            safe_remove(final_main_path)
-            shutil.copy2(main_file, final_main_path)
-    else:
-        logging.info(f"Copying main movie: {os.path.basename(final_main_path)}")
-        shutil.copy2(main_file, final_main_path)
+    for movie_path, filename in video_files:
+        new_edition = get_edition_info(filename) or "{edition-Theatrical Cut}"
+        new_score = get_quality_score(movie_path)
 
+        # If this edition exists and our new file is not better, skip it.
+        if new_edition in existing_versions and new_score <= existing_versions[new_edition]:
+            logging.warning(f"Skipping '{filename}': A same or better quality version of edition '{new_edition}' already exists (Score: {new_score} <= {existing_versions[new_edition]}).")
+            continue
+
+        version_string = get_version_string(movie_path)
+        movie_ext = os.path.splitext(movie_path)[1]
+
+        final_filename_parts = [base_filename]
+        # Only add the edition tag if it's not the default theatrical version
+        if new_edition != "{edition-Theatrical Cut}": final_filename_parts.append(f" {new_edition}")
+        if version_string: final_filename_parts.append(f" - {version_string}")
+
+        final_filename = "".join(final_filename_parts) + movie_ext
+        final_main_path = os.path.join(item_dest_dir, final_filename)
+        final_media_paths[movie_path] = final_main_path
+
+        if not os.path.exists(final_main_path):
+            logging.info(f"Copying new movie version: {final_filename}")
+            shutil.copy2(movie_path, final_main_path)
+        else:
+            logging.warning(f"Version '{final_filename}' already exists. This should not happen with the new check. Skipping.")
+
+    # Process extras associated with the bundle
     for extra_path, _ in extra_files:
         extra_type_dir = get_extra_type(os.path.basename(extra_path))
         if extra_type_dir:
@@ -437,7 +526,9 @@ def process_movie_bundle(bundle_path, metadata, video_files, extra_files, subtit
 
 
 def process_tv_season_bundle(bundle_path, metadata, video_files, subtitle_files):
-    # Docstring here...
+    """
+    Handles the logic for a TV season bundle, supporting multi-version and editions for each episode.
+    """
     logging.info(Fore.CYAN + f"--- Processing as TV Season Bundle: {os.path.basename(bundle_path)} ---")
     title, year, tvdb_id = metadata["name"], metadata["year"], metadata["tvdb_id"]
     safe_title = re.sub(r'[<>:"/\\|?*]', '', title)
@@ -445,13 +536,13 @@ def process_tv_season_bundle(bundle_path, metadata, video_files, subtitle_files)
 
     final_media_paths = {}
 
-    for episode_path, _ in video_files:
-        parsed_episode = parse_filename(os.path.basename(episode_path))
+    for episode_path, filename in video_files:
+        parsed_episode = parse_filename(filename)
         season, start_ep = parsed_episode.get("season"), parsed_episode.get("start_episode")
         end_ep = parsed_episode.get("end_episode")
 
         if season is None or start_ep is None:
-            logging.warning(f"Could not parse season/episode from '{os.path.basename(episode_path)}'. Skipping file.")
+            logging.warning(f"Could not parse season/episode from '{filename}'. Skipping file.")
             continue
 
         season_dest_dir = os.path.join(show_dest_dir, f"Season {season:02d}")
@@ -460,26 +551,38 @@ def process_tv_season_bundle(bundle_path, metadata, video_files, subtitle_files)
         ep_str = f"e{start_ep:02d}"
         if end_ep: ep_str += f"-e{end_ep:02d}"
 
+        base_ep_filename = f"{safe_title} ({year}) - s{season:02d}{ep_str}"
+        existing_versions = get_existing_version_info(season_dest_dir, base_ep_filename)
+
+        new_edition = get_edition_info(filename) or "{edition-Theatrical Cut}"
+        new_score = get_quality_score(episode_path)
+
+        if new_edition in existing_versions and new_score <= existing_versions[new_edition]:
+            logging.warning(f"Skipping '{filename}': A same or better version of edition '{new_edition}' already exists (Score: {new_score} <= {existing_versions[new_edition]}).")
+            continue
+
         ep_ext = os.path.splitext(episode_path)[1]
-        final_ep_filename = f"{safe_title} ({year}) - s{season:02d}{ep_str}{ep_ext}"
+        final_filename_parts = [base_ep_filename]
+        if new_edition != "{edition-Theatrical Cut}": final_filename_parts.append(f" {new_edition}")
+
+        final_ep_filename = "".join(final_filename_parts) + ep_ext
         final_ep_path = os.path.join(season_dest_dir, final_ep_filename)
         final_media_paths[episode_path] = final_ep_path
 
-        if os.path.exists(final_ep_path):
-            new_score, old_score = get_quality_score(episode_path), get_quality_score(final_ep_path)
-            if new_score > old_score:
-                logging.info(f"Upgrading episode '{os.path.basename(final_ep_path)}' (Score: {old_score} -> {new_score})")
-                safe_remove(final_ep_path)
-                shutil.copy2(episode_path, final_ep_path)
-        else:
-            logging.info(f"Copying episode: {os.path.basename(final_ep_path)}")
+        if not os.path.exists(final_ep_path):
+            logging.info(f"Copying new episode version: {final_ep_filename}")
             shutil.copy2(episode_path, final_ep_path)
+        else:
+             logging.warning(f"Version '{final_ep_filename}' already exists. This should not happen with the new check. Skipping.")
 
     process_subtitles(subtitle_files, final_media_paths)
 
 
 def process_bundle(bundle_path):
-    # Docstring here...
+    """
+    Orchestrator function that analyzes a bundle directory, classifies its contents,
+    determines if it's a movie or TV show, and calls the appropriate processor.
+    """
     logging.info(Fore.MAGENTA + f"--- Analyzing Bundle: {os.path.basename(bundle_path)} ---")
 
     video_files, extra_files, subtitle_files = [], [], []
@@ -544,7 +647,11 @@ def process_single_file(filepath):
 
 # --- DIRECTORY WATCHER AND QUEUE MANAGER ---
 class ChangeHandler(FileSystemEventHandler):
-    # Docstring here...
+    """
+    A Watchdog event handler that debounces events and adds items (files or bundles)
+    to a processing queue. This prevents the script from firing on every single
+    file in a large copy operation.
+    """
     def __init__(self, processing_queue):
         super().__init__()
         self.queue = processing_queue
@@ -552,14 +659,19 @@ class ChangeHandler(FileSystemEventHandler):
         self.lock = threading.Lock()
 
     def on_any_event(self, event):
-        # Docstring here...
+        """
+        Called for any file system event in the watched directory.
+
+        Args:
+            event (watchdog.events.FileSystemEvent): The event object.
+        """
         if event.is_directory or not os.path.exists(event.src_path): return
         try:
-            # For a file directly in SOURCE_DIR, the item itself is the bundle.
-            # For a file in a subdirectory, the top-level directory is the bundle.
             relative_path = os.path.relpath(event.src_path, SOURCE_DIR)
             if relative_path.startswith('..'): return
 
+            # If a file is in a subdirectory, the top-level directory is the item to queue.
+            # If a file is at the root, the file itself is the item to queue.
             if os.path.sep in relative_path:
                 bundle_name = relative_path.split(os.path.sep)[0]
                 item_path = os.path.join(SOURCE_DIR, bundle_name)
@@ -567,6 +679,7 @@ class ChangeHandler(FileSystemEventHandler):
                 item_path = event.src_path
 
             with self.lock:
+                # If a timer is already running for this item, cancel it and start a new one.
                 if item_path in self.timers: self.timers[item_path].cancel()
                 timer = threading.Timer(PROCESS_DELAY, self.queue_item, [item_path])
                 self.timers[item_path] = timer
@@ -575,7 +688,13 @@ class ChangeHandler(FileSystemEventHandler):
             pass
 
     def queue_item(self, item_path):
-        # Docstring here...
+        """
+        This function is called by a timer when a watched item has been quiet.
+        It adds the item's path to the processing queue.
+
+        Args:
+            item_path (str): The full path to the file or bundle directory.
+        """
         with self.lock:
             if os.path.exists(item_path) and item_path not in list(self.queue.queue):
                 logging.info(Fore.CYAN + f"Queueing item for processing: {os.path.basename(item_path)}")
@@ -613,7 +732,7 @@ def main():
     root_logger.addHandler(log_handler)
     root_logger.setLevel(logging.INFO)
 
-    logging.info(f"Starting Orz Media Watcher (v0.36 - Single File & Stability)...")
+    logging.info(f"Starting Orz Media Watcher (v0.40 - Final Non-Destructive)...")
     logging.info(f"Source Directory: {SOURCE_DIR}")
     if DELETE_SOURCE_FILES: logging.warning("DELETE_SOURCE_FILES is enabled.")
 

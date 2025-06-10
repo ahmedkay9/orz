@@ -1,6 +1,6 @@
-# Orz - Automated Media Organizer
+# Orzy - Automated Media Organizer
 
-Orz is a powerful, automated media organizer designed to watch a source directory for new movie and TV show files, identify them using TheTVDB, and then rename and organize them into a clean, Plex-compliant library structure.
+Orzy is a powerful, automated media organizer designed to watch a source directory for new movie and TV show files, identify them using TheTVDB, and then rename and organize them into a clean, Plex-compliant library structure.
 
 The script is built to be robust, handling entire media bundles (e.g., a movie with all its featurettes, or a full season of a TV show) as a single atomic unit. It intelligently supports multiple versions and editions of the same media, ensuring your library is both complete and non-destructive.
 
@@ -66,7 +66,7 @@ The application is designed to be run as a Docker container for simplicity and p
     ```bash
     docker-compose up -d
     ```
-    This will start the `orz-watcher` service in the background.
+    This will start the `orzy-watcher` service in the background.
 
 3.  **Viewing Logs**: To see the real-time output of the script, including colored warnings and errors, use the following command:
     ```bash
@@ -82,7 +82,7 @@ The application is designed to be run as a Docker container for simplicity and p
 
 The script's architecture is designed for robustness and reliability:
 
-1.  **Watch**: The `ChangeHandler` in `orz_watcher.py` monitors the `SOURCE_DIR` for any file creation or modification.
+1.  **Watch**: The `ChangeHandler` in `orzy_watcher.py` monitors the `SOURCE_DIR` for any file creation or modification.
 2.  **Debounce & Queue**: When an event is detected, it doesn't act immediately. It starts a short timer (`PROCESS_DELAY`). If more file events occur for the same item (e.g., a large directory being copied), the timer resets. Once the item is "quiet," its path is added to a central processing queue.
 3.  **Stability Check**: The `worker` thread pulls an item from the queue and begins an active stability check, ensuring the file or directory's contents are no longer changing before proceeding.
 4.  **Analyze & Process**: The item is passed to a processor which classifies it as a movie, TV show, single file, or bundle. It fetches metadata, compares versions, and moves all related files (main feature, extras, subtitles) to their final destination in one atomic operation.

@@ -1,8 +1,9 @@
 services:
-  orz-watcher:
+  orzy-watcher:
     build: .
-    container_name: orz-watcher
+    container_name: orzy-watcher
     restart: unless-stopped
+    tty: true # this allows for colored logs through docker
     environment:
       # --- Required ---
       - TVDB_API_KEY=${TVDB_API_KEY}

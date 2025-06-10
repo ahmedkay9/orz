@@ -100,7 +100,7 @@ def main():
     root_logger.addHandler(log_handler)
     root_logger.setLevel(logging.INFO)
 
-    logging.info(f"Starting Orz Media Watcher (v1.0 - Refactored)...")
+    logging.info(f"Starting Orzy Media Watcher (v1.0.0)")
     logging.info(f"Source Directory: {SOURCE_DIR}")
     if DELETE_SOURCE_FILES: logging.warning("DELETE_SOURCE_FILES is enabled.")
 

@@ -174,6 +174,12 @@ def parse_filename(filename):
             end_episode = int(se_match.group(3))
     se_pos = se_match.start() if se_match else float('inf')
     end_of_title_pos = min(year_pos, se_pos)
+
+    # If no anchor (year or S/E) was found, end_of_title_pos is infinity.
+    # We change it to None, which tells the slice to take the whole string.
+    if end_of_title_pos == float('inf'):
+        end_of_title_pos = None
+
     title_part = clean_name[:end_of_title_pos].strip()
     title = re.sub(r'\s+', ' ', title_part).strip()
     return {"title": title, "year": year, "season": season, "start_episode": start_episode, "end_episode": end_episode}
@@ -256,10 +262,11 @@ def safe_remove(path, is_source=False):
         logging.error(f"Failed to remove path '{path}': {e}")
 
 # In orz_automated.py
+
 def process_file(filepath, metadata):
     """
     Processes a single file, determining if it's a main feature or an extra,
-    and moves it to the correct destination.
+    and moves it to the correct destination with Plex-compliant naming.
     """
     if not os.path.exists(filepath):
         return
@@ -269,7 +276,7 @@ def process_file(filepath, metadata):
     extra_type = get_extra_type(filename)
 
     # This gets the destination directory (e.g., /data/tv/Show (Year) {tvdb-id})
-    # We pass the file's own parsed info for episodes, and the metadata for title/year.
+    # and the base filename for the main feature (e.g., "The Maze Runner (2014)")
     parsed_info = parse_filename(filename)
     _, base_filename, final_file_dir, item_dest_dir = get_destination_path(parsed_info, metadata, ext)
 
@@ -279,13 +286,19 @@ def process_file(filepath, metadata):
         logging.info(Fore.CYAN + f"--- Processing Extra File: {filename} ---")
         extra_dest_dir = os.path.join(item_dest_dir, extra_type)
         os.makedirs(extra_dest_dir, exist_ok=True)
-        dest_path = os.path.join(extra_dest_dir, filename) # Keep original filename for extras
+
+        # --- START: NEW NAMING LOGIC FOR EXTRAS ---
+        # Combine the main feature's base name with the extra's original name.
+        original_extra_name = os.path.splitext(filename)[0]
+        new_extra_filename = f"{base_filename} - {original_extra_name}{ext}"
+        dest_path = os.path.join(extra_dest_dir, new_extra_filename)
+        # --- END: NEW NAMING LOGIC FOR EXTRAS ---
 
         if os.path.exists(dest_path):
             logging.warning(f"Extra file already exists, skipping: {dest_path}")
         else:
             shutil.copy2(filepath, dest_path)
-            logging.info(Fore.GREEN + f"Successfully copied extra file to: {dest_path}")
+            logging.info(Fore.GREEN + f"Successfully copied and renamed extra file to: {dest_path}")
 
         safe_remove(filepath, is_source=True) # Cleanup source
         return # End processing for this file
@@ -311,7 +324,6 @@ def process_file(filepath, metadata):
         if new_score > existing_score:
             logging.info(f"Upgrading '{os.path.basename(existing_file_path)}' (Score: {existing_score}) with new file (Score: {new_score}).")
             safe_remove(existing_file_path)
-            # You may want to add logic here to clean up old extras if upgrading
         else:
             logging.warning(f"Skipping '{filename}', existing file has same/higher quality (New: {new_score} vs Existing: {existing_score}).")
             safe_remove(filepath, is_source=True)

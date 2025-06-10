@@ -101,6 +101,37 @@ def get_video_resolution(filepath):
         logging.error(f"ffprobe failed for '{os.path.basename(filepath)}': {e}")
         return 0
 
+def find_media_context(filepath):
+    """
+    Parses a filename and, if that fails to yield a title, walks up the
+    directory tree to find a parent folder with parsable media information.
+    """
+    # First, try to parse the file's own name.
+    filename = os.path.basename(filepath)
+    parsed_info = parse_filename(filename)
+
+    # If the filename itself contains a full title (and is not just an "extra"), use it.
+    if parsed_info and parsed_info.get("title") and not get_extra_type(filename):
+        logging.info(f"Found context directly in filename: '{filename}'")
+        return parsed_info
+
+    # If the file is an extra or has no title, search parent directories for context.
+    logging.info(f"'{filename}' is an extra or has no title; searching parent directories for context...")
+    current_path = os.path.dirname(os.path.abspath(filepath))
+    source_root = os.path.abspath(SOURCE_DIR)
+
+    # Walk up until we hit the source root
+    while current_path.startswith(source_root) and current_path != source_root:
+        parent_folder_name = os.path.basename(current_path)
+        parent_parsed_info = parse_filename(parent_folder_name)
+        if parent_parsed_info and parent_parsed_info.get("title") and parent_parsed_info.get("year"):
+            logging.info(f"Found context for '{filename}' in parent folder '{parent_folder_name}'.")
+            return parent_parsed_info # Success!
+        current_path = os.path.dirname(current_path)
+
+    logging.warning(f"Could not find any media context for '{filename}' in its path.")
+    return None
+
 def get_quality_score(filepath):
     filename_lower = os.path.basename(filepath).lower()
     score = 0
@@ -224,36 +255,55 @@ def safe_remove(path, is_source=False):
     except OSError as e:
         logging.error(f"Failed to remove path '{path}': {e}")
 
+# In orz_automated.py
 def process_file(filepath, metadata):
-    """Processes a file using pre-fetched metadata."""
+    """
+    Processes a single file, determining if it's a main feature or an extra,
+    and moves it to the correct destination.
+    """
     if not os.path.exists(filepath):
         return
 
     filename = os.path.basename(filepath)
-    source_extras = []
-    source_folder = os.path.dirname(filepath)
-    for f in os.listdir(source_folder):
-        if f != filename and os.path.isfile(os.path.join(source_folder, f)):
-             source_extras.append(os.path.join(source_folder, f))
-
-    logging.info(Fore.CYAN + f"--- Processing Main File: {filename} ---")
-
-    parsed_info = parse_filename(filename)
     ext = os.path.splitext(filename)[1]
-    final_dest_path, base_filename, final_file_dir, item_dest_dir = get_destination_path(parsed_info, metadata, ext)
+    extra_type = get_extra_type(filename)
 
+    # This gets the destination directory (e.g., /data/tv/Show (Year) {tvdb-id})
+    # We pass the file's own parsed info for episodes, and the metadata for title/year.
+    parsed_info = parse_filename(filename)
+    _, base_filename, final_file_dir, item_dest_dir = get_destination_path(parsed_info, metadata, ext)
+
+
+    # --- LOGIC FOR EXTRA FILES (like 'Gag Reel.mkv') ---
+    if extra_type:
+        logging.info(Fore.CYAN + f"--- Processing Extra File: {filename} ---")
+        extra_dest_dir = os.path.join(item_dest_dir, extra_type)
+        os.makedirs(extra_dest_dir, exist_ok=True)
+        dest_path = os.path.join(extra_dest_dir, filename) # Keep original filename for extras
+
+        if os.path.exists(dest_path):
+            logging.warning(f"Extra file already exists, skipping: {dest_path}")
+        else:
+            shutil.copy2(filepath, dest_path)
+            logging.info(Fore.GREEN + f"Successfully copied extra file to: {dest_path}")
+
+        safe_remove(filepath, is_source=True) # Cleanup source
+        return # End processing for this file
+
+    # --- LOGIC FOR MAIN MOVIE/EPISODE FILES ---
+    logging.info(Fore.CYAN + f"--- Processing Main File: {filename} ---")
     os.makedirs(final_file_dir, exist_ok=True)
-    if os.path.exists(final_dest_path):
-        logging.warning(f"Exact file already exists: {final_dest_path}. Skipping source file.")
-        safe_remove(filepath, is_source=True)
-        for extra in source_extras: safe_remove(extra, is_source=True)
-        return
+    final_dest_path = os.path.join(final_file_dir, f"{base_filename}{ext}")
 
+    # Handle upgrades by comparing quality scores
     existing_file_path = None
-    for f in os.listdir(final_file_dir):
-        if f.startswith(base_filename):
-            existing_file_path = os.path.join(final_file_dir, f)
-            break
+    if os.path.exists(final_dest_path):
+        existing_file_path = final_dest_path
+    else: # Check for files that might have different suffixes (e.g. resolution)
+        for f in os.listdir(final_file_dir):
+            if f.startswith(base_filename):
+                existing_file_path = os.path.join(final_file_dir, f)
+                break
 
     if existing_file_path:
         new_score = get_quality_score(filepath)
@@ -261,44 +311,16 @@ def process_file(filepath, metadata):
         if new_score > existing_score:
             logging.info(f"Upgrading '{os.path.basename(existing_file_path)}' (Score: {existing_score}) with new file (Score: {new_score}).")
             safe_remove(existing_file_path)
-            shutil.rmtree(os.path.join(item_dest_dir, 'Subtitles'), ignore_errors=True)
-            shutil.rmtree(os.path.join(item_dest_dir, 'Featurettes'), ignore_errors=True)
+            # You may want to add logic here to clean up old extras if upgrading
         else:
-            logging.warning(f"Skipping, existing file has same/higher quality.")
+            logging.warning(f"Skipping '{filename}', existing file has same/higher quality (New: {new_score} vs Existing: {existing_score}).")
             safe_remove(filepath, is_source=True)
-            for extra in source_extras: safe_remove(extra, is_source=True)
             return
 
     try:
         shutil.copy2(filepath, final_dest_path)
         logging.info(Fore.GREEN + f"Successfully copied main file to: {final_dest_path}")
         safe_remove(filepath, is_source=True)
-
-        for extra_filepath in source_extras:
-            extra_filename = os.path.basename(extra_filepath)
-            extra_ext = os.path.splitext(extra_filename)[1].lower()
-            if extra_ext in SUBTITLE_EXTENSIONS:
-                sub_basename = os.path.splitext(extra_filename)[0]
-                lang_match = re.search(r'[._ -]?(\w+)$', sub_basename)
-                lang_code = 'en'
-                if lang_match:
-                    lang_str = lang_match.group(1).lower()
-                    if lang_str in LANG_CODE_MAP: lang_code = LANG_CODE_MAP[lang_str]
-                    elif len(lang_str) in [2, 3]: lang_code = lang_str
-                sub_filename = f"{base_filename}.{lang_code}{extra_ext}"
-                dest_path = os.path.join(final_file_dir, sub_filename)
-                shutil.copy2(extra_filepath, dest_path)
-                logging.info(f"Copied subtitle to: {dest_path}")
-            elif is_video_file(extra_filename):
-                extra_type_dir_name = get_extra_type(extra_filename)
-                if extra_type_dir_name:
-                    extra_dest_dir = os.path.join(item_dest_dir, extra_type_dir_name)
-                    os.makedirs(extra_dest_dir, exist_ok=True)
-                    dest_path = os.path.join(extra_dest_dir, extra_filename)
-                    shutil.copy2(extra_filepath, dest_path)
-                    logging.info(f"Copied extra '{extra_filename}' to: {dest_path}")
-            safe_remove(extra_filepath, is_source=True)
-
     except Exception as e:
         logging.error(f"Failed during copy of '{filename}': {e}")
 
@@ -310,33 +332,37 @@ class NewFileHandler(FileSystemEventHandler):
         filepath = event.src_path
         filename = os.path.basename(filepath)
 
-        if not is_video_file(filename) or get_extra_type(filename) is not None:
-            return
+        try:
+            if not is_video_file(filename):
+                return
 
-        logging.info(f"Watchdog detected new MAIN file: {filename}.")
+            logging.info(f"Watchdog detected new video file: {filename}.")
 
-        if not wait_for_file_stability(filepath):
-            return
+            if not wait_for_file_stability(filepath):
+                return
 
-        parsed_info = parse_filename(filename)
-        metadata = search_and_verify_metadata(parsed_info)
+            context_info = find_media_context(filepath)
 
-        if not metadata:
-            logging.error(f"Pre-check failed to find metadata for '{filename}'. Moving to 'failed'.")
-            failed_dir = os.path.join(os.path.dirname(filepath), 'failed')
-            os.makedirs(failed_dir, exist_ok=True)
-            try: shutil.move(filepath, os.path.join(failed_dir, filename))
-            except Exception as e: logging.error(f"Could not move file to failed directory: {e}")
-            return
+            if not context_info:
+                logging.error(f"Failed to find media context for '{filename}'. The file will be skipped.")
+                return
 
-        ext = os.path.splitext(filename)[1]
-        final_dest_path, _, _, _ = get_destination_path(parsed_info, metadata, ext)
-        if os.path.exists(final_dest_path):
-            logging.info(f"Pre-check found existing file for '{filename}'. Skipping.")
-            safe_remove(filepath, is_source=True)
-            return
+            metadata = search_and_verify_metadata(context_info)
 
-        process_file(filepath, metadata)
+            if not metadata:
+                logging.warning(f"Could not find TVDB match for context '{context_info.get('title')}'. Skipping '{filename}'.")
+                return
+
+            process_file(filepath, metadata)
+
+        except Exception:
+            # Graceful failure for any other unexpected errors.
+            logging.error(
+                f"An unexpected error occurred while processing '{filename}'. "
+                f"The file will be skipped and left in place.",
+                exc_info=True
+            )
+            pass
 
 def main():
     logging.info("Starting Orz Media Watcher (v0.10)...")

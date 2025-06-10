@@ -18,8 +18,12 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code into the container
-COPY orz_automated.py .
+COPY config.py .
+COPY utils.py .
+COPY metadata.py .
+COPY processor.py .
+COPY orz_watcher.py .
 COPY .env .
 
 # The command that will be run when the container starts
-CMD ["python", "orz_automated.py"]
+CMD ["python", "orz_watcher.py"]

@@ -1,112 +1,91 @@
-# Orz - Automated Media Organizer for Plex
+# Orz - Automated Media Organizer
 
-Orz is a powerful, automated media organizer designed to work seamlessly with Plex. It watches a directory for new downloads, intelligently identifies them as movies or TV shows, fetches metadata from TheTVDB, and renames and organizes them into a clean, Plex-compliant library structure.
+Orz is a powerful, automated media organizer designed to watch a source directory for new movie and TV show files, identify them using TheTVDB, and then rename and organize them into a clean, Plex-compliant library structure.
 
-The script runs continuously in a Docker container, making it a "set it and forget it" solution for maintaining a tidy media library.
-
----
+The script is built to be robust, handling entire media bundles (e.g., a movie with all its featurettes, or a full season of a TV show) as a single atomic unit. It intelligently supports multiple versions and editions of the same media, ensuring your library is both complete and non-destructive.
 
 ## Key Features
 
-- **Automated Directory Watching**: No more manual script execution. Orz automatically detects new video files and begins processing them.
-- **Intelligent Metadata Matching**: Uses fuzzy string matching (`thefuzz`) and a confidence score to accurately identify movies and TV shows, significantly reducing mismatches.
-- **Quality-Based Upgrades**: Automatically replaces existing media files with higher-quality versions. It can compare a new `1080p` file against an existing `720p` file and perform an upgrade.
-- **Reliable Quality Detection**: Uses `ffprobe` to read a video's true resolution directly from its metadata stream. This works even if your existing library files don't have quality keywords in their names.
-- **Plex-Compliant Naming**: Creates filenames and directory structures that follow Plex's official naming conventions for movies, TV shows, seasons, and episodes.
-- **Extras & Subtitle Handling**: Intelligently identifies and organizes supplementary files like featurettes, deleted scenes, interviews, and subtitles into the correct subdirectories for Plex.
-- **Containerized with Docker**: Packaged with all its dependencies in a Docker container for easy, one-command deployment.
-- **Robust Error Handling**: Problematic files that can't be matched are moved to a `failed` directory for manual review, preventing the script from getting stuck.
+* **Automated Directory Watching**: Continuously monitors a source directory for new media using a file system watcher.
+* **Intelligent Bundle Processing**: Treats a directory containing a movie or TV season as a single "bundle." It waits for the entire directory to be copied before processing, preventing errors with large or slow transfers.
+* **Plex-Compliant Naming**: Renames files and structures directories according to Plex's official naming conventions for movies, TV shows, extras, and subtitles.
+* **TVDB Metadata Integration**: Accurately identifies media by searching TheTVDB API, including robust handling for foreign films with English titles.
+* **Non-Destructive & Multi-Version Support**:
+    * **Never deletes existing files** in your destination library.
+    * If a better quality version of a file arrives, it is added alongside the existing one.
+    * If a lower quality version arrives, it is intelligently ignored to prevent clutter.
+* **Editions Support**: Automatically detects and tags different editions of a film or episode (e.g., `Superfan Cut`, `Director's Cut`, `Theatrical`) according to Plex guidelines.
+* **Comprehensive File Handling**:
+    * Processes both single media files and full directory bundles.
+    * Correctly identifies and organizes special features like featurettes, deleted scenes, gag reels, and trailers into appropriate subfolders.
+    * Parses and renames subtitle files to match their corresponding media files, including language and forced/SDH tags.
+* **Robust and Resilient**: Built with a queueing system and error handling that prevents the application from crashing on a single failed file.
+* **Dockerized**: Runs as a self-contained Docker service for easy deployment and dependency management.
+* **Highly Configurable**: All major settings, including API keys, directories, and filename parsing keywords, are managed through a `.env` file and a central `config.py` file for easy customization.
 
----
+## Requirements
 
-## Prerequisites
+* Python 3.11+
+* Docker & Docker Compose
+* An API key from [TheTVDB](https://www.thetvdb.com/subscribe)
+* All Python dependencies as listed in `requirements.txt`
+* **System Dependency**: The application requires `ffmpeg` to be installed (which provides `ffprobe`) for video quality analysis. This is handled automatically within the provided `Dockerfile`.
 
-Before you begin, ensure you have the following installed on your system:
+## Setup & Configuration
 
-- **Git** (for cloning the repository)
-- **Docker** and **Docker Compose** (for running the application)
+1.  **Clone the Repository**:
+    ```bash
+    git clone [your-repo-url]
+    cd [your-repo-directory]
+    ```
 
----
+2.  **Create an Environment File**: Copy the example environment file to create your own configuration.
+    ```bash
+    cp .env.example .env
+    ```
 
-## Setup and Installation
+3.  **Edit the `.env` file**: Open the newly created `.env` file and fill in the required values:
+    * `TVDB_API_KEY`: Your personal API key from TheTVDB.
+    * `SOURCE_DIR`: The directory the script will watch for new media (e.g., `./test_watch`).
+    * `DEST_BASE_DIR`: The base directory where your organized `tv` and `movies` libraries will be created (e.g., `./test_data`).
+    * `DELETE_SOURCE_FILES`: Set to `true` to delete the source files/folders after successful processing, or `false` (default) to leave them untouched.
 
-Follow these steps to get Orz up and running.
+4.  **(Optional) Customize Keywords**: For advanced customization, you can edit the dictionaries in `config.py` to add or change keywords for detecting editions, versions, and extras.
 
-**1. Clone the Repository**
-```bash
-git clone [https://github.com/ahmedkay9/orz.git](https://github.com/ahmedkay9/orz.git)
-cd orz
-```
+## Running with Docker
 
-**2. Create the Environment File**
-Create a file named `.env` in the root of the project directory. This file will store your secret API key. Add the following line, replacing `YOUR_KEY_HERE` with your actual key from TheTVDB.
+The application is designed to be run as a Docker container for simplicity and portability.
 
-```
-TVDB_API_KEY=YOUR_KEY_HERE
-```
+1.  **Build the Docker Image**:
+    ```bash
+    docker-compose build
+    ```
+    *(The first time you run this, it will download the Python base image and install ffmpeg, which may take a few minutes. Subsequent builds will be much faster.)*
 
-**3. Configure Media Paths**
-Open the `docker-compose.yml` file. You need to tell Docker where your media is located. Edit the `volumes` section to map your host machine's directories to the directories inside the container.
+2.  **Start the Service**:
+    ```bash
+    docker-compose up -d
+    ```
+    This will start the `orz-watcher` service in the background.
 
-- **For Production on a Server:**
-  Replace the example paths with the *actual* paths to your downloads and Plex library.
-  ```yaml
-  volumes:
-    # Path to your completed downloads folder : Path inside the container
-    - /path/to/your/downloads/completed:/watch
-    # Path to your Plex library root : Path inside the container
-    - /path/to/your/plex/library:/data
-  ```
+3.  **Viewing Logs**: To see the real-time output of the script, including colored warnings and errors, use the following command:
+    ```bash
+    docker-compose logs -f
+    ```
 
-- **For Local Testing:**
-  You can use local folders to test without affecting your real library.
-  ```yaml
-  volumes:
-    - ./test-watch:/watch
-    - ./test-data:/data
-  ```
-
----
-
-## Usage
-
-**Running the Application**
-
-Navigate to the project directory in your terminal and run the following command:
-
-```bash
-docker-compose up --build -d
-```
-- `--build`: This flag is only needed the first time you run it or after making changes to the code or `Dockerfile`.
-- `-d`: Runs the container in "detached" mode (in the background), so it will keep running even after you close your terminal.
-
-That's it! Orz is now watching your `/watch` directory for new content.
-
-**Viewing Logs**
-To see what the script is doing in real-time, you can view its logs:
-```bash
-docker-compose logs -f
-```
-Press `Ctrl + C` to stop viewing the logs.
-
-**Stopping the Application**
-To stop the container, run:
-```bash
-docker-compose down
-```
-
----
+4.  **Stopping the Service**:
+    ```bash
+    docker-compose down
+    ```
 
 ## How It Works
 
-1. **Watch**: The `watchdog` library monitors the `/watch` source directory for new files.
+The script's architecture is designed for robustness and reliability:
 
-2. **Identify**: When a new file appears, the script identifies the primary video file in the download and scans for associated extras (other videos, subtitles).
+1.  **Watch**: The `ChangeHandler` in `orz_watcher.py` monitors the `SOURCE_DIR` for any file creation or modification.
+2.  **Debounce & Queue**: When an event is detected, it doesn't act immediately. It starts a short timer (`PROCESS_DELAY`). If more file events occur for the same item (e.g., a large directory being copied), the timer resets. Once the item is "quiet," its path is added to a central processing queue.
+3.  **Stability Check**: The `worker` thread pulls an item from the queue and begins an active stability check, ensuring the file or directory's contents are no longer changing before proceeding.
+4.  **Analyze & Process**: The item is passed to a processor which classifies it as a movie, TV show, single file, or bundle. It fetches metadata, compares versions, and moves all related files (main feature, extras, subtitles) to their final destination in one atomic operation.
 
-3. **Parse & Search**: It parses the filename to extract the title, year, and episode information. It then searches TheTVDB and uses a fuzzy matching algorithm to find the best metadata match.
+This bundle-based, non-destructive approach ensures that your media library is organized correctly and safely, even when dealing with complex, multi-file media.
 
-4. **Compare & Upgrade**: If a version of the file already exists in the destination library, the script uses `ffprobe` to compare the quality of the new and existing files, performing an upgrade if necessary.
-
-5. **Copy & Organize**: The script copies the main video file and all its associated extras and subtitles to the destination `/data` directory, creating the proper Plex-compliant folder structure (e.g., `/TV Shows/Show Name (Year)/Season 01/`).
-
-6. **Repeat**: The script continues watching for the next new file.
